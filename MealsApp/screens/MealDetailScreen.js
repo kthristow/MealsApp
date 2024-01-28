@@ -1,38 +1,44 @@
-import {
-  Text,
-  View,
-  Image,
-  StyleSheet,
-  ScrollView,
-  Button,
-} from "react-native";
-import { MEALS } from "../data/dummy-data";
-import MealDetails from "../components/MealDetails";
-import Subtitle from "../components/MealDetail/Subtitle";
-import List from "../components/MealDetail/List";
 import { useLayoutEffect } from "react";
+import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+
 import IconButton from "../components/IconButton";
+import List from "../components/MealDetail/List";
+import Subtitle from "../components/MealDetail/Subtitle";
+import MealDetails from "../components/MealDetails";
+import { MEALS } from "../data/dummy-data";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
 
 function MealDetailScreen({ route, navigation }) {
-  const mealId = route.params.mealId;
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
 
-  function headerButtonPressHandler() {}
+  const mealId = route.params.mealId;
+  const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+
+  const mealIsFavorite = favoriteMealIds.includes(mealId);
+
+  function changeFavoriteStatusHandler() {
+    if (mealIsFavorite) {
+      dispatch(removeFavorite({ id: mealId }));
+    } else {
+      dispatch(addFavorite({ id: mealId }));
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
         return (
           <IconButton
-            onPress={headerButtonPressHandler}
-            icon="star"
+            icon={mealIsFavorite ? "star" : "star-outline"}
             color="white"
+            onPress={changeFavoriteStatusHandler}
           />
         );
       },
     });
-  }, [navigation, headerButtonPressHandler]);
-
-  const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+  }, [navigation, changeFavoriteStatusHandler]);
 
   return (
     <ScrollView style={styles.rootContainer}>
@@ -40,8 +46,8 @@ function MealDetailScreen({ route, navigation }) {
       <Text style={styles.title}>{selectedMeal.title}</Text>
       <MealDetails
         duration={selectedMeal.duration}
-        affordability={selectedMeal.affordability}
         complexity={selectedMeal.complexity}
+        affordability={selectedMeal.affordability}
         textStyle={styles.detailText}
       />
       <View style={styles.listOuterContainer}>
@@ -55,6 +61,8 @@ function MealDetailScreen({ route, navigation }) {
     </ScrollView>
   );
 }
+
+export default MealDetailScreen;
 
 const styles = StyleSheet.create({
   rootContainer: {
@@ -74,12 +82,10 @@ const styles = StyleSheet.create({
   detailText: {
     color: "white",
   },
-  listContainer: {
-    width: "80%",
-  },
   listOuterContainer: {
     alignItems: "center",
   },
+  listContainer: {
+    width: "80%",
+  },
 });
-
-export default MealDetailScreen;
