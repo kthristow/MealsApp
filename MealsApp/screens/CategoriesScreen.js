@@ -11,9 +11,11 @@ function renderCateroryItem(itemData) {
 function CategoriesScreen() {
   return (
     <FlatList
+      key={Math.random()}
       data={CATEGORIES}
       keyExtractor={(item) => item.id}
       renderItem={renderCateroryItem}
+      numColumns={2}
     />
   );
 }
